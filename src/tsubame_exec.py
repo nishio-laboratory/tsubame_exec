@@ -8,6 +8,7 @@ from invoke.exceptions import UnexpectedExit
 from pathlib import Path
 from patchwork.transfers import rsync
 
+
 def make_connection(config: dict) -> Connection:
     conn_config = config["connection"]
     user = conn_config.get("username")
