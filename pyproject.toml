@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tsubame-exec"
+version = "0.1.0"
+description = "Execute code on tsubame"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "Eshan Ramesh", email = "esrh@esrh.me" }
+]
+dependencies = [
+  "termcolor",
+  "fabric",
+  "patchwork",
+  "platformdirs",
+  "toml"
+]
+
+[project.scripts]
+tsubame-exec = "main:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["tsubame_exec", "validation", "main"]
