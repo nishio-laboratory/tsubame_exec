@@ -1,7 +1,6 @@
 import time
 from typing import Literal
 from termcolor import colored
-import textwrap
 import fabric
 from fabric import Connection
 from invoke.exceptions import UnexpectedExit
@@ -47,18 +46,20 @@ def construct_script(config: dict) -> str:
             for k, v in config["env"].get("env_vars", {}).items()
         ]
     )
-    out = f"""\
-    #!/bin/sh
-    #$ -cwd
-    #$ -l {config["resource"]["type"]}={config["resource"]["count"]}
-    #$ -l h_rt={config["max_runtime"]}
-    #$ -N {config["name"]}
-    {env_var_str}
-    {module_str}
-    {python_dep_str}
-    {config["cmd"]}\
+    out = (
+    )
+    out = f"""
+#!/bin/sh
+#$ -cwd
+#$ -l {config["resource"]["type"]}={config["resource"]["count"]}
+#$ -l h_rt={config["max_runtime"]}
+#$ -N {config["name"]}
+{env_var_str}
+{module_str}
+{python_dep_str}
+{config["cmd"]}
     """
-    return textwrap.dedent(out)
+    return out
 
 
 def tail_status(

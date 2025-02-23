@@ -16,7 +16,7 @@ dependencies = [
   "fabric",
   "patchwork",
   "platformdirs",
-  "toml"
+  "toml",
 ]
 
 [project.scripts]

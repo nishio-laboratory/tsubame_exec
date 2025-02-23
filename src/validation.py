@@ -6,7 +6,7 @@ def validate_exec_config(config) -> None:
         config["exec"]["name"] = "job.sh"
     if "resource" not in config["exec"]:
         config["exec"]["resource"] = {}
-    if "max_runtime" not in config["exec"]["resource"]:
+    if "max_runtime" not in config["exec"]:
         print(
             colored(
                 f"exec.max_runtime not defined. defaulting to 00:04:59", "red"
@@ -22,13 +22,13 @@ def validate_exec_config(config) -> None:
         config["exec"]["resource"]["type"] = "cpu_4"
     if "count" not in config["exec"]["resource"]:
         config["exec"]["resource"]["count"] = "1"
-    if "group" not in config["exec"]["env"]:
+    if "group" not in config["exec"]:
         print(
             colored(
-                "exec.env.group not specified. defaulting to tga-nlab", "red"
+                "exec.group not specified. defaulting to tga-nlab", "red"
             )
         )
-        config["exec"]["env"]["group"] = "tga-nlab"
+        config["exec"]["group"] = "tga-nlab"
 
     valid_resource_types = [
         "node_f",

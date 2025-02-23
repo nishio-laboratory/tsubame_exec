@@ -21,10 +21,11 @@ def main():
         sync_dir(conn, config, key)
 
     exec_dir = config["exec"]["env"]["dir"]
+    conn.run(f"mkdir -p {exec_dir}")
     conn.put(io.StringIO(construct_script(config)), exec_dir + "/job.sh")
     with conn.cd(exec_dir):
         submit_stdo = conn.run(
-            f'bash -c "qsub job.sh -g {config["exec"]["env"]["group"]}"',
+            f'bash -c "qsub job.sh -g {config["exec"]["group"]}"',
             hide=True,
         ).stdout
         submit_stdo_matches = re.search(r"Your job (\d+)", submit_stdo)
@@ -61,3 +62,6 @@ def parse_args() -> argparse.Namespace:
         )
 
     return args
+
+if __name__ == "__main__":
+    main()
