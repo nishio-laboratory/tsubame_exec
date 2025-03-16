@@ -9,10 +9,10 @@ def validate_exec_config(config) -> None:
     if "max_runtime" not in config["exec"]:
         print(
             colored(
-                f"exec.max_runtime not defined. defaulting to 00:04:59", "red"
+                f"exec.max_runtime not defined. defaulting to 00:05:00", "red"
             )
         )
-        config["exec"]["max_runtime"] = "23:59:59"
+        config["exec"]["max_runtime"] = "00:05:00"
     if "type" not in config["exec"]["resource"]:
         print(
             colored(
@@ -23,10 +23,7 @@ def validate_exec_config(config) -> None:
     if "count" not in config["exec"]["resource"]:
         config["exec"]["resource"]["count"] = "1"
     if "group" not in config["exec"]:
-        print(
-            colored("exec.group not specified. defaulting to tga-nlab", "red")
-        )
-        config["exec"]["group"] = "tga-nlab"
+        raise Exception("exec.group not specified")
 
     valid_resource_types = [
         "node_f",
