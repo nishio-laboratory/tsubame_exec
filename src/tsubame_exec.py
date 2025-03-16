@@ -10,7 +10,6 @@ from patchwork.transfers import rsync
 
 def make_connection(config: dict) -> Connection:
     conn_config = config["connection"]
-    user = conn_config.get("username")
     password = conn_config.get("password")
     other = {"password": password} if password else {}
     return fabric.Connection(
@@ -46,8 +45,8 @@ def construct_script(config: dict) -> str:
             for k, v in config["env"].get("env_vars", {}).items()
         ]
     )
-    out = (
-    )
+    if isinstance(config["cmd"], list):
+        config["cmd"] = " && ".join(config["cmd"])
     out = f"""
 #!/bin/sh
 #$ -cwd

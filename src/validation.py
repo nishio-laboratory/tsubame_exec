@@ -24,9 +24,7 @@ def validate_exec_config(config) -> None:
         config["exec"]["resource"]["count"] = "1"
     if "group" not in config["exec"]:
         print(
-            colored(
-                "exec.group not specified. defaulting to tga-nlab", "red"
-            )
+            colored("exec.group not specified. defaulting to tga-nlab", "red")
         )
         config["exec"]["group"] = "tga-nlab"
 
