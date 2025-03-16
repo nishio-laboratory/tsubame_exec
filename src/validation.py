@@ -1,4 +1,5 @@
 from termcolor import colored
+import datetime
 
 
 def validate_exec_config(config) -> None:
@@ -13,6 +14,10 @@ def validate_exec_config(config) -> None:
             )
         )
         config["exec"]["max_runtime"] = "00:05:00"
+    if isinstance(config["exec"]["max_runtime"], datetime.time):
+        config["exec"]["max_runtime"] = config["exec"]["max_runtime"].strftime(
+            "%H:%M:%S"
+        )
     if "type" not in config["exec"]["resource"]:
         print(
             colored(

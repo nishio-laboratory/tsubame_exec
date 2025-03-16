@@ -25,7 +25,7 @@ excludes = [".*", "__*"]
 
 [exec]
 cmd = "echo 'hello world'" # required, may be a list of multiple commands
-max_runtime = "23:59:59"
+max_runtime = 23:59:59 # may also be a str
 name = "test_job"
 group = "tga-test"
 
