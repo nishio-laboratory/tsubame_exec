@@ -29,36 +29,51 @@ def sync_dir(conn: Connection, config: dict, key: str) -> None:
 
 def construct_script(config: dict) -> str:
     config = config["exec"]
-    module_str = "\n".join(
-        [f"module load {i}" for i in config["env"].get("modules", [])]
-    )
-    python_dep_str = (
-        "python3 -m pip install --user "
-        + " ".join([i for i in config["env"]["python_deps"]])
-        if "python_deps" in config["env"]
-        and len(config["env"]["python_deps"]) > 0
-        else ""
-    )
-    env_var_str = "\n".join(
-        [
-            f"export {k}={v}"
-            for k, v in config["env"].get("env_vars", {}).items()
-        ]
-    )
-    if isinstance(config["cmd"], list):
-        config["cmd"] = " && ".join(config["cmd"])
-    out = f"""
-#!/bin/sh
-#$ -cwd
-#$ -l {config["resource"]["type"]}={config["resource"]["count"]}
-#$ -l h_rt={config["max_runtime"]}
-#$ -N {config["name"]}
-{env_var_str}
-{module_str}
-{python_dep_str}
-{config["cmd"]}
-    """
-    return out
+    script_lines = [
+        "#!/bin/sh",
+        "#$ -cwd",
+        # resource
+        (
+            f"#$ -l {config['resource']['type']}={config['resource']['count']}"
+            if "resource" in config
+            else ""
+        ),
+        # job name
+        f"#$ -N {config['name']}" if "name" in config else "",
+        (
+            f"#$ -l h_rt={config['max_runtime']}"
+            if "max_runtime" in config
+            else ""
+        ),
+        # extra opts
+        "\n".join([f"#$ {i}" for i in config.get("extra_options", [])]),
+        # env vars
+        "\n".join(
+            [
+                f"export {k}={v}"
+                for k, v in config["env"].get("env_vars", {}).items()
+            ]
+        ),
+        # modules
+        "\n".join(
+            [f"module load {i}" for i in config["env"].get("modules", [])]
+        ),
+        # python deps
+        (
+            "python3 -m pip install --user "
+            + " ".join([i for i in config["env"]["python_deps"]])
+            if "python_deps" in config["env"]
+            and len(config["env"]["python_deps"]) > 0
+            else ""
+        ),
+        # cmds
+        (
+            config["cmd"]
+            if isinstance(config["cmd"], str)
+            else " && ".join(config["cmd"])
+        ),
+    ]
+    return "\n".join(script_lines) + "\n"
 
 
 def tail_status(

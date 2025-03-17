@@ -13,8 +13,10 @@ def main():
     config = parse_config(args)
     conn = make_connection(config)
 
-    validation.validate_exec_config(config)
     validation.validate_minimal(config)
+
+    if args.tsubame_validation or config.get("tsubame_validation"):
+        validation.validate_exec_config(config)
 
     for key in config["sync"]:
         validation.validate_sync(config["sync"][key], key)
@@ -24,11 +26,15 @@ def main():
     conn.run(f"mkdir -p {exec_dir}")
     conn.put(io.StringIO(construct_script(config)), exec_dir + "/job.sh")
     with conn.cd(exec_dir):
-        submit_stdo = conn.run(
-            f'bash -c "qsub job.sh -g {config["exec"]["group"]}"',
-            hide=True,
-        ).stdout
-        submit_stdo_matches = re.search(r"Your job (\d+)", submit_stdo)
+        group_str = (
+            f"-g {config['exec']['group']}"
+            if "group" in config["exec"]
+            else ""
+        )
+        submit_stdo_matches = re.search(
+            r"Your job (\d+)",
+            conn.run(f'bash -c "qsub job.sh {group_str}"', hide=True).stdout,
+        )
         if submit_stdo_matches is None:
             raise Exception("could not parse job_id from submit response")
         else:
@@ -53,6 +59,7 @@ def parse_config(args):
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", required=True, type=Path)
+    parser.add_argument("--tsubame-validation", action="store_true")
     parser.add_argument("--tail", default=False)
     args = parser.parse_args()
 

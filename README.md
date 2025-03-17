@@ -28,6 +28,7 @@ cmd = "echo 'hello world'" # required, may be a list of multiple commands
 max_runtime = 23:59:59 # may also be a str
 name = "test_job"
 group = "tga-test"
+extra_options = ["-p PRIORITY"]
 
 [exec.env]
 dir = "tsubame_exec" # required, directory from which to run cmd
@@ -35,7 +36,7 @@ modules = ["intel", "cuda"]
 python_deps = ["numpy", "matplotlib"]
 env_vars = {TEST = 123}
 
-[exec.env.resource]
+[exec.resource]
 type = "gpu_1"
 count = 1 # default 1
 ```
@@ -53,8 +54,13 @@ In this case, `tsubame-exec` will:
 ## Notes
 - You can have as many tables under the `sync` table as you like (as long as they have unique names).
 - Python dependencies specified in `exec.env.python_deps` are installed via pip, but this is subject to change.
-- use `tsubame-exec -c config.toml --tail stdout` to submit the job and then watch the output
+- `tsubame-exec -c config.toml --tsubame-validation` is equivalent to including `tsubame_validation = true` in the top level of your `config.toml`. Use this option to invoke tsubame-specific safety checks.
 - define global options in `XDG_CONFIG_DIR/tsubame_exec/config.toml`. these options are merged with the config file every run. Use the global file to define, for instance, connection settings or syncs that should be run for every project.
+- Use `tsubame-exec --tail {stdout/stderr}` to wait for a job to submit and then follow a stream. there is currently no checking to see whether a job has finished, so this will block, use ctrl-c to exit. I suggest printing a message in your code to notify completion.
+
+## For non-tsubame users
+- `exec.max_runtime` translates to `#$ -l h_rt=TIME` in the generated script
+- I suspect that most use cases can be covered with the `exec.extra_options` list. Each one is simply prefixed with `#$` and inserted into the generated script
 
 ## TODO
 - Tests
