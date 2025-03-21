@@ -1,11 +1,12 @@
 import time
-from typing import Literal
+from typing import Literal, Union
 from termcolor import colored
 import fabric
 from fabric import Connection
 from invoke.exceptions import UnexpectedExit
 from pathlib import Path
 from patchwork.transfers import rsync
+from string import Template
 
 
 def make_connection(config: dict) -> Connection:
@@ -25,6 +26,25 @@ def sync_dir(conn: Connection, config: dict, key: str) -> None:
     excludes = config["sync"][key].get("excludes", [])
     print(colored(f"rsyncing {key} from {src} to tsubame:{dst}", "blue"))
     rsync(conn, src, dst, exclude=excludes)
+
+
+def flatten_dict(dd, separator="_", prefix="") -> dict:
+    return (
+        {
+            prefix + "_" + k if prefix else k: v
+            for kk, vv in dd.items()
+            for k, v in flatten_dict(vv, separator, kk).items()
+        }
+        if isinstance(dd, dict)
+        else {prefix: dd}
+    )
+
+
+def format_cmd_str(cmds: Union[list, str], config: dict) -> str:
+    if isinstance(cmds, str):
+        cmds = [cmds]
+    flat_dict = flatten_dict(config)
+    return " && ".join(Template(i).substitute(flat_dict) for i in cmds)
 
 
 def construct_script(config: dict) -> str:
@@ -67,11 +87,7 @@ def construct_script(config: dict) -> str:
             else ""
         ),
         # cmds
-        (
-            config["cmd"]
-            if isinstance(config["cmd"], str)
-            else " && ".join(config["cmd"])
-        ),
+        format_cmd_str(config["cmd"], config)
     ]
     return "\n".join(script_lines) + "\n"
 

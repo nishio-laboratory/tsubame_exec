@@ -57,6 +57,10 @@ In this case, `tsubame-exec` will:
 - `tsubame-exec -c config.toml --tsubame-validation` is equivalent to including `tsubame_validation = true` in the top level of your `config.toml`. Use this option to invoke tsubame-specific safety checks.
 - define global options in `XDG_CONFIG_DIR/tsubame_exec/config.toml`. these options are merged with the config file every run. Use the global file to define, for instance, connection settings or syncs that should be run for every project.
 - Use `tsubame-exec --tail {stdout/stderr}` to wait for a job to submit and then follow a stream. there is currently no checking to see whether a job has finished, so this will block, use ctrl-c to exit. I suggest printing a message in your code to notify completion.
+- Command strings support templating using `string.Template`. The `exec` table gets flattened
+(in the case of nested dictionaries, the key names are joined by
+'_'). So, to use the resource type, use `cmd = "echo $resource_type"`
+
 
 ## For non-tsubame users
 - `exec.max_runtime` translates to `#$ -l h_rt=TIME` in the generated script
