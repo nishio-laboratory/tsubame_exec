@@ -22,6 +22,9 @@ def main():
         validation.validate_sync(config["sync"][key], key)
         sync_dir(conn, config, key)
 
+    # modifies exec.name, exec.env.dir, exec.cmd
+    template_exec_config(config["exec"])
+
     exec_dir = config["exec"]["env"]["dir"]
     conn.run(f"mkdir -p {exec_dir}")
     conn.put(io.StringIO(construct_script(config)), exec_dir + "/job.sh")

@@ -39,12 +39,24 @@ def flatten_dict(dd, separator="_", prefix="") -> dict:
         else {prefix: dd}
     )
 
-
-def format_cmd_str(cmds: Union[list, str], config: dict) -> str:
-    if isinstance(cmds, str):
-        cmds = [cmds]
+def template_exec_config(config: dict) -> None:
+    """
+    1. template name
+    2. template env.dir
+    3. format possibly list of cmds and template
+    """
     flat_dict = flatten_dict(config)
-    return " && ".join(Template(i).substitute(flat_dict) for i in cmds)
+    if "name" in config:
+        config["name"] = Template(config["name"]).substitute(flat_dict)
+        flat_dict["name"] = config["name"]
+
+    if "dir" in config["env"]:
+        config["env"]["dir"] = Template(config["env"]["dir"]).substitute(flat_dict)
+        flat_dict["env_dir"] = config["env"]["dir"]
+
+    if isinstance(config["cmd"], str):
+        config["cmd"] = [config["cmd"]]  # enforce exec.cmd to be list
+    config["cmd"] = " && ".join(Template(i).substitute(flat_dict) for i in config["cmd"])
 
 
 def construct_script(config: dict) -> str:
@@ -87,7 +99,7 @@ def construct_script(config: dict) -> str:
             else ""
         ),
         # cmds
-        format_cmd_str(config["cmd"], config)
+        config["cmd"]
     ]
     return "\n".join(script_lines) + "\n"
 
